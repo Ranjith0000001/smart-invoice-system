@@ -13,7 +13,7 @@ function* fetchInvoices() {
   try {
     const response = yield call(api.get, "/invoices");
     yield put(fetchInvoicesSuccess(response.data));
-  } catch (error) {
+  } catch (err) {
     yield put(fetchInvoicesFailure());
   }
 }
@@ -22,7 +22,7 @@ function* createInvoice(action) {
   try {
     const response = yield call(api.post, "/invoices", action.payload);
     yield put(createInvoiceSuccess(response.data));
-  } catch (error) {
+  } catch (err) {
     yield put(createInvoiceFailure());
   }
 }

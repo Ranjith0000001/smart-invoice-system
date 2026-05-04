@@ -1,7 +1,15 @@
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 
-const CustomButton = (props) => {
-  return <Button variant="contained" {...props} />;
+const CustomButton = ({ children, loading, disabled, ...props }) => {
+  return (
+    <Button
+      disabled={loading || disabled}
+      startIcon={loading ? <CircularProgress size={16} color="inherit" /> : props.startIcon}
+      {...props}
+    >
+      {children}
+    </Button>
+  );
 };
 
 export default CustomButton;

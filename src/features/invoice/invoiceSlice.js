@@ -20,7 +20,7 @@ const invoiceSlice = createSlice({
       state.loading = false;
     },
 
-    createInvoiceRequest: (state, action) => {
+    createInvoiceRequest: (state) => {
       state.loading = true;
     },
     createInvoiceSuccess: (state, action) => {
