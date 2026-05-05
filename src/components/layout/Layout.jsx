@@ -36,7 +36,7 @@ const DrawerContent = ({ location, navigate }) => (
         <Typography sx={{ color: "#f1f5f9", fontWeight: 800, fontSize: 16, lineHeight: 1.2, letterSpacing: "-0.3px" }}>
           SmartInvoice
         </Typography>
-        <Typography sx={{ color: "#475569", fontSize: 11, fontWeight: 500 }}>
+        <Typography sx={{ color: "#f1f5f9", fontSize: 11, fontWeight: 500 }}>
           Payment System
         </Typography>
       </Box>
@@ -182,13 +182,6 @@ const Layout = ({ children }) => {
             <Typography variant="h6" sx={{ color: "text.primary", fontWeight: 700, flex: 1 }}>
               {currentPage}
             </Typography>
-            <Tooltip title="Notifications">
-              <IconButton sx={{ color: "text.secondary" }}>
-                <Badge badgeContent={3} color="primary">
-                  <NotificationsNoneRoundedIcon />
-                </Badge>
-              </IconButton>
-            </Tooltip>
             <Avatar sx={{ width: 34, height: 34, background: "linear-gradient(135deg,#6366f1,#0ea5e9)", fontSize: 13, fontWeight: 700 }}>
               A
             </Avatar>

@@ -148,11 +148,7 @@ const InvoiceForm = () => {
                     Price (₹)
                   </Typography>
                 </Grid>
-                <Grid item xs={2}>
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary", textTransform: "uppercase", fontSize: 10, letterSpacing: 0.5 }}>
-                    Amount
-                  </Typography>
-                </Grid>
+                
               </Grid>
 
               {fields.map((field, index) => {
