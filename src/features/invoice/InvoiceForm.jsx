@@ -1,4 +1,4 @@
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { createInvoiceRequest } from "./invoiceSlice";
 import {
@@ -37,13 +37,17 @@ const InvoiceForm = () => {
   });
 
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
-  const items = watch("items");
+  
+  const watchedItems = useWatch({
+    control,
+    name: "items",
+  }) || fields;
 
   const { subtotal, tax, total } = useMemo(() => {
-    const subtotal = items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.price) || 0), 0);
+    const subtotal = watchedItems.reduce((sum, item) => sum + (Number(item?.quantity || 0) * Number(item?.price || 0) || 0), 0);
     const tax = subtotal * 0.1;
     return { subtotal, tax, total: subtotal + tax };
-  }, [items]);
+  }, [watchedItems]);
 
   const onSubmit = (data) => {
     const finalData = { ...data, subtotal, tax, total, status: "Draft" };
@@ -152,8 +156,8 @@ const InvoiceForm = () => {
               </Grid>
 
               {fields.map((field, index) => {
-                const qty = Number(items[index]?.quantity) || 0;
-                const price = Number(items[index]?.price) || 0;
+                const qty = Number(watchedItems[index]?.quantity) || 0;
+                const price = Number(watchedItems[index]?.price) || 0;
                 const amount = qty * price;
                 return (
                   <Box

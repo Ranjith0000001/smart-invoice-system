@@ -1,9 +1,14 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useMemo, useState } from "react";
-import { Box, Typography, Avatar, Tooltip, IconButton } from "@mui/material";
+import { Box, Typography, Avatar, Tooltip, IconButton, Dialog, DialogTitle, DialogContent, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
+import PictureAsPdfRoundedIcon from "@mui/icons-material/PictureAsPdfRounded";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
 import api from "../../services/api";
 import StatusChip from "../../components/common/StatusChip";
@@ -12,10 +17,10 @@ import { fetchInvoicesRequest } from "./invoiceSlice";
 import { useNavigate } from "react-router-dom";
 
 const InvoiceList = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { invoices, loading } = useSelector((state) => state.invoice);
   const [paying, setPaying] = useState(null);
+  const [viewItems, setViewItems] = useState(null);
 
   const handlePay = async (invoiceId) => {
     setPaying(invoiceId);
@@ -30,6 +35,44 @@ const InvoiceList = () => {
     } finally {
       setPaying(null);
     }
+  };
+
+  // Generate PDF Invoice document using jsPDF and jspdf-autotable
+  const handleGeneratePdf = (invoice) => {
+    const doc = new jsPDF();
+
+    // Header
+    doc.setFontSize(20);
+    doc.text("INVOICE", 14, 22);
+
+    // Details
+    doc.setFontSize(12);
+    doc.text(`Invoice ID: #${invoice._id?.slice(-8) || "N/A"}`, 14, 32);
+    doc.text(`Customer Name: ${invoice.customerName}`, 14, 40);
+    doc.text(`Status: ${invoice.status}`, 14, 56);
+
+    // Line Items Table
+    const tableData = invoice.items?.map((item) => [
+      item.name,
+      item.quantity,
+      `INR ${item.price.toFixed(2)}`,
+      `INR ${(item.quantity * item.price).toFixed(2)}`,
+    ]) || [];
+
+    autoTable(doc, {
+      startY: 64,
+      head: [["Item Description", "Quantity", "Price", "Amount"]],
+      body: tableData,
+      foot: [
+        ["", "", "Subtotal", `INR ${invoice.subtotal?.toFixed(2) || "0.00"}`],
+        ["", "", "Tax (10%)", `INR ${invoice.tax?.toFixed(2) || "0.00"}`],
+        ["", "", "Total", `INR ${invoice.total?.toFixed(2) || "0.00"}`]
+      ],
+      headStyles: { fillColor: [99, 102, 241] }, // Match primary color
+    });
+
+    // Save PDF
+    doc.save(`Invoice_${invoice._id?.slice(-8) || "Draft"}.pdf`);
   };
 
   const getInitials = (name = "") =>
@@ -74,11 +117,21 @@ const InvoiceList = () => {
         accessorKey: "items",
         header: "Items",
         size: 100,
-        Cell: ({ cell }) => (
-          <Typography variant="body2" color="text.secondary">
-            {cell.getValue()?.length || 0} item{cell.getValue()?.length !== 1 ? "s" : ""}
-          </Typography>
-        ),
+        Cell: ({ cell }) => {
+          const items = cell.getValue() || [];
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography variant="body2" color="text.secondary">
+                {items.length} item{items.length !== 1 ? "s" : ""}
+              </Typography>
+              {items.length > 0 && (
+                <IconButton size="small" onClick={() => setViewItems(items)} sx={{ p: 0.5 }}>
+                  <InfoOutlinedIcon sx={{ fontSize: 18, color: "text.secondary", "&:hover": { color: "primary.main" } }} />
+                </IconButton>
+              )}
+            </Box>
+          );
+        },
       },
       {
         accessorKey: "total",
@@ -101,20 +154,29 @@ const InvoiceList = () => {
       {
         id: "actions",
         header: "Action",
-        size: 120,
+        size: 180, // Increased size slightly to fit icons
         Cell: ({ row }) => (
-          <CustomButton
-            size="small"
-            variant={row.original.status === "Paid" ? "outlined" : "contained"}
-            disabled={row.original.status === "Paid"}
-            loading={paying === row.original._id}
-            onClick={() => handlePay(row.original._id)}
-            startIcon={<PaymentRoundedIcon sx={{ fontSize: 16 }} />}
-            color={row.original.status === "Failed" ? "error" : "primary"}
-            sx={{ borderRadius: 1.5, fontSize: 12, minWidth: 90 }}
-          >
-            {row.original.status === "Paid" ? "Paid" : row.original.status === "Failed" ? "Retry" : "Pay Now"}
-          </CustomButton>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <CustomButton
+              size="small"
+              variant={row.original.status === "Paid" ? "outlined" : "contained"}
+              disabled={row.original.status === "Paid"}
+              loading={paying === row.original._id}
+              onClick={() => handlePay(row.original._id)}
+              startIcon={<PaymentRoundedIcon sx={{ fontSize: 16 }} />}
+              color={row.original.status === "Failed" ? "error" : "primary"}
+              sx={{ borderRadius: 1.5, fontSize: 12, minWidth: 90 }}
+            >
+              {row.original.status === "Paid" ? "Paid" : row.original.status === "Failed" ? "Retry" : "Pay Now"}
+            </CustomButton>
+
+            {/* Action Icon: Generate PDF Invoice */}
+            <Tooltip title="Download PDF">
+              <IconButton size="small" onClick={() => handleGeneratePdf(row.original)} color="primary">
+                <PictureAsPdfRoundedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
         ),
       },
     ],
@@ -127,7 +189,7 @@ const InvoiceList = () => {
     state: { isLoading: loading },
     enableFullScreenToggle: false,
     enableDensityToggle: false,
-    initialState: { 
+    initialState: {
       pagination: { pageSize: 10, pageIndex: 0 },
       showGlobalFilter: true,
     },
@@ -186,6 +248,38 @@ const InvoiceList = () => {
 
       {/* MRT Table */}
       <MaterialReactTable table={table} />
+
+      {/* Items Details Modal */}
+      <Dialog open={Boolean(viewItems)} onClose={() => setViewItems(null)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ m: 0, p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: 700 }}>
+          Item Details
+          <IconButton onClick={() => setViewItems(null)}>
+            <CloseRoundedIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell><b>Product</b></TableCell>
+                <TableCell><b>Quantity</b></TableCell>
+                <TableCell><b>Price</b></TableCell>
+                <TableCell><b>Amount</b></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {viewItems?.map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell>{item.name}</TableCell>
+                  <TableCell>{item.quantity}</TableCell>
+                  <TableCell>₹{item.price.toFixed(2)}</TableCell>
+                  <TableCell>₹{(item.quantity * item.price).toFixed(2)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

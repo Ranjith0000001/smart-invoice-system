@@ -17,6 +17,8 @@
     "@reduxjs/toolkit": "^2.11.2",
     "@stripe/stripe-js": "^9.4.0",
     "axios": "^1.16.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "material-react-table": "^3.2.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
