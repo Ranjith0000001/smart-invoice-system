@@ -1,16 +1,91 @@
-# React + Vite
+# Smart Invoice System – Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📌 Overview
 
-Currently, two official plugins are available:
+This is the frontend application for the Smart Invoice & Payment System. It allows users to create invoices, manage items, and make payments using Stripe.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 🚀 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+* React (Vite)
+* Redux Toolkit
+* Redux-Saga
+* React Hook Form
+* Material UI
+* Axios
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## ⚙️ Setup Instructions
+
+### 1. Clone the repository
+
+git clone <your-frontend-repo-url>
+
+### 2. Navigate to project
+
+cd smart-invoice-client
+
+### 3. Install dependencies
+
+npm install
+
+### 4. Run application
+
+npm run dev
+
+---
+
+## 🌐 Application URL
+
+http://localhost:5173
+
+---
+
+## 🔗 Backend API
+
+Update API base URL in:
+src/services/api.js
+
+Example:
+http://localhost:3000/api
+
+---
+
+## ✨ Features
+
+* Create invoice with customer details
+* Add multiple items dynamically
+* Auto calculation (subtotal, tax, total)
+* View invoice list
+* Filter by status (Draft, Paid, Failed)
+* Stripe payment integration
+* Payment success & cancel pages
+
+---
+
+## 💳 Payment Flow
+
+1. User clicks Pay
+2. Backend creates Stripe session
+3. User redirected to Stripe
+4. Payment completed
+5. Redirect back to frontend
+
+---
+
+## 🧠 State Management
+
+* Redux used for global state
+* Redux-Saga handles API calls
+* Clean separation of UI and logic
+
+---
+
+## ⚠️ Notes
+
+* Stripe uses test mode only
+* No sensitive keys stored in frontend
+* Proper error handling implemented
+
